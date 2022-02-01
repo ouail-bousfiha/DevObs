@@ -1,0 +1,22 @@
+version: '3.3'
+services:
+  backend:
+    build: ./API/simple-api-main/simple-api-main/simple-api
+    networks: 
+      - app-network
+    depends_on: 
+      - some-postgres 
+  some-postgres: 
+    build: ./bdd
+    networks: 
+      - app-network
+  server-http:
+    build: ./http 
+    ports: 
+      - 80:80
+    networks: 
+      - app-network
+    depends_on: 
+      - backend  
+networks:
+  app-network:

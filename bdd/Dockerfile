@@ -1,0 +1,7 @@
+FROM postgres:11.6
+
+ENV POSTGRES_DB=db \
+    POSTGRES_USER=usr \
+    POSTGRES_PASSWORD=pwd
+
+
