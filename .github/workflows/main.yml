@@ -36,9 +36,9 @@ jobs:
       - name: Build and test with Maven
         run: mvn clean verify --file ./API/simple-api-main/simple-api-main/simple-api
         
-build-and-push-docker-image:
+  build-and-push-docker-image:
 
-    needs: test-backend
+    needs: backend
     # run only when code is compiling and tests are passing
     runs-on: ubuntu-latest
     
