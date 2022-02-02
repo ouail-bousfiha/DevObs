@@ -31,6 +31,9 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Build and test with Maven
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any #On rajoute ce token car il y a une erreur sinon
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: mvn -B verify sonar:sonar -Dsonar.projectKey=ouail-bousfiha_DevObs -Dsonar.organization=ouail-bousfiha -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{secrets.SONAR_TOKEN }} --file ./API/simple-api-main/simple-api-main/simple-api/
         
   build-and-push-docker-image:
