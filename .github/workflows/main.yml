@@ -6,9 +6,8 @@ name: CI devops 2022 CPE
 on:
   # Triggers the workflow on push or pull request events but only for the main branch
   push:
-    branches: [ main ]
+    branches: master
   pull_request:
-    branches: [ main ]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -57,7 +56,7 @@ jobs:
           context: ./API/simple-api-main/simple-api-main/simple-api
           # Note: tags has to be all lower-case
           tags: ${{secrets.DOCKERHUB_USER}}/backend
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: ${{ github.ref == 'refs/heads/master' }}
 
       - name: Build image and push database
         uses: docker/build-push-action@v2
@@ -66,7 +65,7 @@ jobs:
           context: ./bdd
           # Note: tags has to be all lower-case
           tags: ${{secrets.DOCKERHUB_USER}}/some-postgres
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: ${{ github.ref == 'refs/heads/master' }}
 
       - name: Build image and push httpd
         uses: docker/build-push-action@v2
@@ -75,4 +74,4 @@ jobs:
           context: ./http
           # Note: tags has to be all lower-case
           tags: ${{secrets.DOCKERHUB_USER}}/server-http
-          push: ${{ github.ref == 'refs/heads/main' }}
+          push: ${{ github.ref == 'refs/heads/master' }}
