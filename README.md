@@ -114,7 +114,7 @@ docker-compose up --build
 docker push dans nos espace en ligne
 
 
-TP2 
+# TP2 
 
 Creation du repertoire Git et mettre les precedent TP dedans
 
