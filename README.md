@@ -1,12 +1,12 @@
 # DevObs
 
-TP 1
+# TP 1
 
 
 docker network create app-network             																# creation du reseau
-                                              																# admirer interface pour la base de donnée
+                                              				
                                                                               
-docker run --name some-postgres -e POSTGRES_PASSWORD=pwd -e POSTGRES_USER=usr -e POSTGRES_DB=db -d --network=app-network postgres                                       #
+docker run --name some-postgres -e POSTGRES_PASSWORD=pwd -e POSTGRES_USER=usr -e POSTGRES_DB=db -d --network=app-network postgres                                     
 docker run -d --link test:db --network=app-network -p 8080:8080 adminer
 
 # BDD 
@@ -112,3 +112,81 @@ on cree un fichier docker compose a la racine de tout nos fichier avec les ligne
     
 docker-compose up --build
 docker push dans nos espace en ligne
+
+
+TP2 
+
+Creation du repertoire Git et mettre les precedent TP dedans
+
+Main.yml final TP2 github workflow :
+
+name: CI devops 2022 CPE
+
+on:
+  push:
+    branches: master
+  pull_request:
+
+  workflow_dispatch:
+
+jobs:
+
+  backend:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+
+      - uses: actions/checkout@v2.3.3
+
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v2
+        with:
+            java-version: '11'
+            distribution: 'adopt'
+
+
+      - name: Build and test with Maven
+        run: mvn clean verify --file ./API/simple-api-main/simple-api-main/simple-api
+
+  build-and-push-docker-image:
+
+    needs: backend
+
+    runs-on: ubuntu-latest
+    
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        run: docker login -u ${{secrets.DOCKERHUB_USERNAME}} -p ${{secrets.DOCKERHUB_TOKEN}}
+
+      - name: Build image and push backend
+        uses: docker/build-push-action@v2
+        with:
+
+          context: ./API/simple-api-main/simple-api-main/simple-api
+
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/backend
+          push: ${{ github.ref == 'refs/heads/master' }}
+
+      - name: Build image and push database
+        uses: docker/build-push-action@v2
+        with:
+
+          context: ./bdd
+
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/some-postgres
+          push: ${{ github.ref == 'refs/heads/master' }}
+
+      - name: Build image and push httpd
+        uses: docker/build-push-action@v2
+        with:
+
+          context: ./http
+
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/server-http
+          push: ${{ github.ref == 'refs/heads/master' }}
