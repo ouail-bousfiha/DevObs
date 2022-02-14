@@ -190,3 +190,34 @@ jobs:
 
           tags: ${{secrets.DOCKERHUB_USERNAME}}/server-http
           push: ${{ github.ref == 'refs/heads/master' }}
+          
+ # TP 3
+ 
+ On créé les different roles grace a la commande : ansible-galaxy init roles/xxxx(nom du role)
+ 
+ on met l'odre d'execution des roles dans le fichier playbook.yml :
+ 
+ - hosts: all
+  gather_facts: false
+  become: yes
+  
+  roles:
+  - docker
+  - network
+  - database
+  - app
+  - proxy
+ 
+ on configure les differents roles.
+ 
+on donne les droits pour la clef id_rsa en lecture et on configure le fichier setup.yml:
+
+ all:
+  vars:
+    ansible_user: centos
+    ansible_ssh_private_key_file: /home/ouail/home/id_rsa
+  children:
+    prod:
+      hosts: ouail.bousfiha.takima.cloud
+
+ on compile tout 
