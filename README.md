@@ -35,6 +35,12 @@ Docker file hello world :
 docker build -t oui/test .
 docker run  -p 5000:8080 --name test oui/test
 
+application.yml :
+
+- url: "jdbc:postgresql://some-postgres:5432/db"
+- username: usr
+- password: pwd
+
 Docker file mvn :
 
   FROM maven:3.6.3-jdk-11 AS myapp-build
@@ -44,7 +50,7 @@ Docker file mvn :
   COPY src ./src
   RUN mvn dependency:go-offline
   RUN mvn package -DskipTests
-  # Run
+
   FROM openjdk:11-jre
   ENV MYAPP_HOME /opt/myapp
   WORKDIR $MYAPP_HOME
@@ -52,13 +58,57 @@ Docker file mvn :
   ENTRYPOINT java -jar myapp.jar
 
 docker build -t oui/BACKEND .
-docker run  -p 5000:8080 --name test oui/BACKEND
+docker run  -p 5000:8080 --name BACKEND --network=app-network oui/BACKEND
 
-application.yml :
+# http
 
-- url: "jdbc:postgresql://some-postgres:5432/db"
-- username: usr
-- password: pwd
+docker run --rm httpd:2.4 cat /usr/local/apache2/conf/httpd.conf > my-httpd.conf 
 
+Dockerfile :
+  FROM httpd:2.4
+  COPY index.html /usr/local/apache2/htdocs/
+  COPY httpd.conf /usr/local/apache2/conf/httpd.conf
+  
+docker build -t oui/http .
+docker run -dit --name httpapp --network=app-network -p 80:80 oui/http
 
-# BACKEND
+decommenter dans le fichier httpd.conf, mod_proxy_http et mod_proxy.
+
+on rajouter dans le fichier httpd.conf : 
+
+  ServerName localhost
+  <VirtualHost *:80>
+      ProxyPreserveHost On
+      ProxyPass / http://backend:8080/
+      ProxyPassReverse / http://backend:8080/
+  </VirtualHost>
+
+docker run -dit --name httpapp --network=app-network -p 8080:8080 oui/http
+
+on cree un fichier docker compose a la racine de tout nos fichier avec les ligne suivante :
+
+  version: '3.3'
+  services:
+    backend:
+      build: ./API/simple-api-main/simple-api-main/simple-api
+      networks: 
+        - app-network
+      depends_on: 
+        - some-postgres 
+    some-postgres: 
+      build: ./bdd
+      networks: 
+        - app-network
+    server-http:
+      build: ./http 
+      ports: 
+        - 80:80
+      networks: 
+        - app-network
+      depends_on: 
+        - backend  
+  networks:
+    app-network:
+    
+docker-compose up --build
+docker push dans nos espace en ligne
